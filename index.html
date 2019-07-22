@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Nice to see you! Let's do it!</h1>
+    <form>
+      <label for="videoInput">Pick ur video file</label>
+      <input id="videoInput" type="file" accept="video/*" />
+      <div>
+        <button>Extract Video Length</button>
+      </div>
+      <p id="result"></p>
+    </form>
+    <script>
+      // ipc
+      const electron = require('electron');
+      const { ipcRenderer } = electron;
+      console.log(ipcRenderer);
+
+      // selectors
+      const form = document.querySelector('form');
+      const result = document.querySelector('#result');
+      const videoInput = document.getElementById('videoInput');
+
+      // event handler
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const file = videoInput.files[0];
+        if (!file) {
+          console.log('Please pick a video file first');
+          return;
+        }
+        // send file path to electron side through ipc
+        const { path } = file;
+        ipcRenderer.send('video:submit', path);
+
+        // listen for video length from electron side through ipc
+        ipcRenderer.on('video:length', (event, length) => {
+          result.innerHTML = `Video length is ${length}`;
+        });
+      });
+    </script>
+  </body>
+</html>
